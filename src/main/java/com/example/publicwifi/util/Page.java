@@ -1,4 +1,4 @@
-package com.example.publicwifi.common;
+package com.example.publicwifi.util;
 
 import lombok.Getter;
 

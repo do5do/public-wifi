@@ -6,7 +6,8 @@
 </head>
 <body>
     <script type="text/javascript">
-        location.href = "wifi";
+        // location.href = "wifi"; // api pagination
+        location.href = "wifi/v2"; // db 조회
     </script>
 </body>
 </html>

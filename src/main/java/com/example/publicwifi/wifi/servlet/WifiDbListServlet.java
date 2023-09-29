@@ -13,8 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/wifi")
-public class WifiListServlet extends HttpServlet {
+@WebServlet("/wifi/v2")
+public class WifiDbListServlet extends HttpServlet {
     private WifiService wifiService;
 
     @Override
@@ -24,20 +24,15 @@ public class WifiListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String page = request.getParameter("page");
+        String lnt = request.getParameter("lnt");
 
-        if (page == null || page.isEmpty()) {
-            request.setAttribute("pageable", null);
-            request.setAttribute("wifiList", null);
-        } else {
-            String lnt = request.getParameter("lnt");
+        if (lnt != null) {
             String lat = request.getParameter("lat");
-            Page<Wifi> wifiPage = wifiService.getWifiListWithLoc(Integer.parseInt(page), Double.parseDouble(lnt), Double.parseDouble(lat));
+            List<Wifi> nearbyWifi = wifiService.getNearbyWifi(Double.parseDouble(lnt), Double.parseDouble(lat));
 
             request.setAttribute("lnt", lnt);
             request.setAttribute("lat", lat);
-            request.setAttribute("pageable", wifiPage.getPageable());
-            request.setAttribute("wifiList", wifiPage.getContents());
+            request.setAttribute("wifiList", nearbyWifi);
         }
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/wifi/wifiList.jsp");

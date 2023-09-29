@@ -4,14 +4,17 @@ import com.example.publicwifi.wifi.dto.WifiResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Getter
-public class Wifi {
-    private double distance;
+public class Wifi implements Comparable<Wifi> {
+    private Long wno;
+    private Double distance;
     private String mgmtNum; // 관리 번호
     private String borough; // 자치구
-    private String wifiName;
+    private String wifiName; // 와이파이명
     private String address; // 도로명 주소
     private String addrDetail; // 상세 주소
     private String installLoc; // 설치 위치
@@ -29,8 +32,8 @@ public class Wifi {
     public Wifi() {}
 
     @Builder
-    public Wifi(String mgmtNum, String borough, String wifiName, String address, String addrDetail, String installLoc, String installType, String installAgency, String serviceType, String netType, String installYear, String inoutDoor, String wifiConnEnv, double x, double y, String workDate,
-                double myLnt, double myLat) {
+    public Wifi(Long wno, String mgmtNum, String borough, String wifiName, String address, String addrDetail, String installLoc, String installType, String installAgency, String serviceType, String netType, String installYear, String inoutDoor, String wifiConnEnv, double x, double y, String workDate) {
+        this.wno = wno;
         this.mgmtNum = mgmtNum;
         this.borough = borough;
         this.wifiName = wifiName;
@@ -47,17 +50,22 @@ public class Wifi {
         this.x = x;
         this.y = y;
         this.workDate = workDate;
-
-        setDistance(myLnt, myLat);
     }
 
-    private void setDistance(double x, double y) { // 내 위치 좌표
+    public void setWno(Long wno) {
+        this.wno = wno;
+    }
+
+    public Wifi setDistance(double x, double y) { // 내 위치 좌표
         double dx = x - this.x;
         double dy = y - this.y;
-        this.distance = Math.sqrt(dx * dx + dy * dy);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        this.distance = BigDecimal.valueOf(distance)
+                .setScale(4, RoundingMode.HALF_EVEN).doubleValue();
+        return this;
     }
 
-    public static Wifi toEntity(WifiResponseDto.WifiInfo.Row row, double myLnt, double myLat) {
+    public static Wifi toEntity(WifiResponseDto.WifiInfo.Row row) {
         return Wifi.builder()
                 .mgmtNum(row.X_SWIFI_MGR_NO())
                 .borough(row.X_SWIFI_WRDOFC())
@@ -75,14 +83,24 @@ public class Wifi {
                 .x(row.LAT())
                 .y(row.LNT())
                 .workDate(row.WORK_DTTM())
-                .myLnt(myLnt)
-                .myLat(myLat)
                 .build();
     }
 
-    public static List<Wifi> of(WifiResponseDto responseDto, double myLnt, double myLat) {
+    public static List<Wifi> ofMyLoc(WifiResponseDto responseDto, double myLnt, double myLat) {
         return responseDto.wifiInfo().row().stream()
-                .map(o -> Wifi.toEntity(o, myLnt, myLat))
+                .map(Wifi::toEntity)
+                .map(o -> o.setDistance(myLnt, myLat))
+                .sorted().toList(); // 거리순 정렬
+    }
+
+    public static List<Wifi> of(WifiResponseDto responseDto) {
+        return responseDto.wifiInfo().row().stream()
+                .map(Wifi::toEntity)
                 .toList();
+    }
+
+    @Override
+    public int compareTo(Wifi o) {
+        return Double.compare(this.distance, (o.distance));
     }
 }

@@ -1,55 +1,83 @@
 package com.example.publicwifi.wifi;
 
-import com.example.publicwifi.common.Page;
-import com.example.publicwifi.common.Pageable;
+import com.example.publicwifi.util.Page;
+import com.example.publicwifi.util.Pageable;
+import com.example.publicwifi.wifi.dto.AddressDto;
 import com.example.publicwifi.wifi.dto.KakaoResponseDto;
 import com.example.publicwifi.wifi.dto.WifiResponseDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriBuilder;
+import lombok.Getter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.List;
 
 public class WifiService {
+    private WifiService() {}
+
+    @Getter
+    private static final WifiService instance = new WifiService();
+
     private static final String KEY = "694e4a7654646f31353662534d7568";
     private static final String KAKAO_KEY = "KakaoAK 50772213c82e83f32ae2305ce747b05d";
     private static final int ROW_PER_PAGE = 20;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final WifiDao wifiDao = WifiDao.getInstance();
 
-    public Page<Wifi> getWifiList(Integer currentPage, double lnt, double lat) throws IOException {
+    public List<Wifi> getNearbyWifi(double lnt, double lat) { // 근처 와이파이 정보 20개 가져오기
+        AddressDto address = getAddress(lnt, lat);
+        return wifiDao.findByBorough(address.region(), address.roadName())
+                .stream().map(o -> o.setDistance(lnt, lat))
+                .sorted().toList().subList(0, 20);
+    }
+
+    public Page<Wifi> getWifiListWithLoc(int currentPage, double lnt, double lat) { // 위치 기반 와이파이 api 조회 페이징
         int startRow = (currentPage - 1) * ROW_PER_PAGE + 1;
         int endRow = startRow + ROW_PER_PAGE - 1;
 
+        AddressDto address = getAddress(lnt, lat);
+        WifiResponseDto wifiResponseDto = searchWifi(startRow, endRow, address.region(), address.roadName());
+        return new Page<>(Wifi.ofMyLoc(wifiResponseDto, lnt, lat),
+                Pageable.of(wifiResponseDto.wifiInfo().totalCount(), currentPage, ROW_PER_PAGE));
+    }
+
+    public AddressDto getAddress(double lnt, double lat) {
         KakaoResponseDto kakaoResponseDto = searchAddress(lnt, lat);
+
         String region = kakaoResponseDto.documents().get(0).address().region_2depth_name();
         String roadName = "";
         if (kakaoResponseDto.documents().get(0).roadAddress() != null) {
             roadName = kakaoResponseDto.documents().get(0).roadAddress().road_name();
         }
 
-        WifiResponseDto wifiResponseDto = searchWifi(startRow, endRow, region, roadName);
-        return new Page<>(Wifi.of(wifiResponseDto, lnt, lat), Pageable.of(wifiResponseDto.wifiInfo().totalCount(), currentPage, ROW_PER_PAGE));
+        return new AddressDto(region, roadName);
     }
 
-    public KakaoResponseDto searchAddress(double lnt, double lat) throws IOException {
+    public KakaoResponseDto searchAddress(double lnt, double lat) {
         String url = "https://dapi.kakao.com/v2/local/geo/coord2address";
         URI uri = UriBuilder.fromUri(url)
                 .queryParam("x", lnt)
                 .queryParam("y", lat)
                 .build();
-
-        System.out.println("uri = " + uri);
         StringBuilder sb = httpConnection(uri, true);
-        return objectMapper.readValue(sb.toString(), new TypeReference<>() {});
+        System.out.println(uri);
+
+        try {
+            return objectMapper.readValue(sb.toString(), new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new BadRequestException("올바르지 않은 요청입니다.");
+        }
     }
 
-    public WifiResponseDto searchWifi(int startRow, int endRow, String region, String roadName) throws IOException {
+    public WifiResponseDto searchWifi(int startRow, int endRow, String region, String roadName) {
         String url = "http://openapi.seoul.go.kr:8088";
         URI uri = UriBuilder.fromUri(url)
                 .path(KEY)
@@ -58,14 +86,15 @@ public class WifiService {
                 .path(region)
                 .path(roadName)
                 .build();
-
-        System.out.println("uri = " + uri);
         StringBuilder sb = httpConnection(uri, false);
+        System.out.println(uri);
 
         try {
             return objectMapper.readValue(sb.toString(), new TypeReference<>() {});
         } catch (UnrecognizedPropertyException e) {
             throw new IllegalArgumentException("해당하는 데이터가 없습니다.");
+        } catch (IOException e) {
+            throw new BadRequestException("올바르지 않은 요청입니다.");
         }
     }
 
@@ -89,7 +118,35 @@ public class WifiService {
             }
             return sb;
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException("연결 요청에 실패하였습니다.");
         }
+    }
+
+    public Long loadAndSaveAll() { // 모든 와이파이 데이터 저장
+        int rowPerPage = 1000;
+        int currentPage = 1;
+        int startRow = (currentPage - 1) * rowPerPage + 1;
+        int endRow = startRow + rowPerPage - 1;
+
+        // clear
+        wifiDao.deleteAll();
+
+        WifiResponseDto wifiResponseDto = searchWifi(startRow, endRow, "", "");
+        Long totalCount = wifiResponseDto.wifiInfo().totalCount();
+        long totalPages = (totalCount + rowPerPage - 1) / rowPerPage;
+        wifiDao.saveAll(Wifi.of(wifiResponseDto));
+
+        for (currentPage = 2; currentPage <= totalPages; currentPage++) {
+            startRow = (currentPage - 1) * rowPerPage + 1;
+            endRow = startRow + rowPerPage - 1;
+
+            wifiResponseDto = searchWifi(startRow, endRow, "", "");
+            wifiDao.saveAll(Wifi.of(wifiResponseDto));
+        }
+        return totalCount;
+    }
+
+    public Wifi findById(Long id) {
+        return wifiDao.findById(id);
     }
 }

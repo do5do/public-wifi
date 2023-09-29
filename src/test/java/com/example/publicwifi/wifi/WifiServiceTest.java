@@ -1,26 +1,25 @@
 package com.example.publicwifi.wifi;
 
-import com.example.publicwifi.common.Page;
+import com.example.publicwifi.util.Page;
 import com.example.publicwifi.wifi.dto.KakaoResponseDto;
 import com.example.publicwifi.wifi.dto.WifiResponseDto;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class WifiServiceTest {
-    WifiService wifiService = new WifiService();
+    WifiService wifiService = WifiService.getInstance();
+    WifiDao wifiDao = WifiDao.getInstance();
 
     @Test
-    void searchWifi() throws IOException {
+    void searchWifi() {
         // given
         int startRow = 1;
         int endRow = 5;
-//        String region = "강남구";
-        String region = "부산진구";
+        String region = "";
+//        String region = "부산진구";
         String roadName = "";
 
         // when
@@ -31,14 +30,14 @@ class WifiServiceTest {
     }
 
     @Test
-    void getWifiList() throws IOException {
+    void getWifiList() {
         // given
         int currentPage = 1;
         double lnt = 127.062453121811;
         double lat = 37.4826884445598;
 
         // when
-        Page<Wifi> wifiPage = wifiService.getWifiList(currentPage, lnt, lat);
+        Page<Wifi> wifiPage = wifiService.getWifiListWithLoc(currentPage, lnt, lat);
 
         // then
         assertEquals(wifiPage.getContents().size(), 20);
@@ -46,7 +45,7 @@ class WifiServiceTest {
     }
 
     @Test
-    void searchAddress() throws IOException {
+    void searchAddress() {
         // given
         double lnt = 127.062453121811;
         double lat = 37.4826884445598;
@@ -62,5 +61,25 @@ class WifiServiceTest {
         // then
         assertEquals(region, "강남구");
         assertEquals(roadName, "");
+    }
+
+    @Test
+    void saveWifiList() {
+        // when
+        Long totalCount = wifiService.loadAndSaveAll();
+
+        // then
+        Long getTotal = wifiDao.getTotal();
+        assertEquals(totalCount, getTotal);
+    }
+
+    @Test
+    void getNearbyWifi() {
+        // given
+        double lnt = 126.901955141101;
+        double lat = 37.5662141900954;
+
+        List<Wifi> wifi = wifiService.getNearbyWifi(lnt, lat);
+        System.out.println(wifi);
     }
 }

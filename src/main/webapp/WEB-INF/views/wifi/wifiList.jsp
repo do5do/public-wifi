@@ -14,9 +14,9 @@
             return;
         }
 
+        // api pagination
         // const url = "wifi?page=1&lnt=" + lnt.value + "&lat=" + lat.value
-        // todo : 현재 위치가 서울이 아님.. 강남구 고정값
-        const url = "wifi?page=1&lnt=127.062453121811&lat=37.4826884445598"
+        const url = "${pageContext.request.contextPath}/wifi/v2?lnt=" + lnt.value + "&lat=" + lat.value
 
         await getResText(url)
             .then(text => {
@@ -71,24 +71,28 @@
         }
     }
 </script>
+
 <body>
     <h1>와이파이 정보 구하기</h1>
     <nav>
         <ul>
-            <li><a href="wifi" class="a-btn">홈</a></li>
+            <li><a href="${pageContext.request.contextPath}/wifi/v2" class="a-btn">홈</a></li>
             <li>|</li>
             <li><a href="#" class="a-btn">위치 히스토리 목록</a></li>
             <li>|</li>
+            <li><a href="${pageContext.request.contextPath}/wifi/load" class="a-btn">Open API 와이파이 정보 가져오기</a></li>
+            <li>|</li>
             <li><a href="#" class="a-btn">북마크 보기</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">북마크 그룹 관리</a></li>
+            <li><a href="${pageContext.request.contextPath}/bookmarkGroup" class="a-btn">북마크 그룹 관리</a></li>
         </ul>
     </nav>
-    <ul class="place-section">
+    <ul class="sub-nav">
         <li>
             <label for="lnt">LNT : </label>
             <c:if test="${lnt == null}">
-                <input type="number" id="lnt" value="0.0">
+<%--                <input type="number" id="lnt" value="0.0">--%>
+                <input type="number" id="lnt" value="127.062453121811">
             </c:if>
             <c:if test="${lnt != null}">
                 <input type="number" id="lnt" value="${lnt}">
@@ -97,7 +101,8 @@
         <li>
             <label for="lat">LAT : </label>
             <c:if test="${lat == null}">
-                <input type="number" id="lat" value="0.0">
+<%--                <input type="number" id="lat" value="0.0">--%>
+                <input type="number" id="lat" value="37.4826884445598">
             </c:if>
             <c:if test="${lat != null}">
                 <input type="number" id="lat" value="${lat}">
@@ -136,7 +141,7 @@
         <tbody>
             <c:if test="${wifiList == null}">
                 <tr>
-                    <td colspan="17" id="msg">위치 정보를 입력한 후에 조회해 주세요.</td>
+                    <td colspan="17">위치 정보를 입력한 후에 조회해 주세요.</td>
                 </tr>
             </c:if>
             <c:if test="${wifiList != null}">
@@ -145,7 +150,7 @@
                         <td>${item.distance}</td>
                         <td>${item.mgmtNum}</td>
                         <td>${item.borough}</td>
-                        <td>${item.wifiName}</td>
+                        <td><a href="${pageContext.request.contextPath}/wifi/detail?id=${item.wno}">${item.wifiName}</a></td>
                         <td>${item.address}</td>
                         <td>${item.addrDetail}</td>
                         <td>${item.installLoc}</td>
@@ -164,6 +169,7 @@
             </c:if>
         </tbody>
     </table>
+
     <c:if test="${pageable != null}">
         <ul class="pagination">
             <c:if test="${pageable.startPage > pageable.pagePerBlock}">
@@ -193,11 +199,6 @@
         margin: 0;
     }
 
-    a {
-        text-decoration: none;
-        color: black;
-    }
-
     nav {
        padding-bottom: 1em;
     }
@@ -210,18 +211,33 @@
         padding: 0 .5em;
     }
 
+    .a-btn {
+        text-decoration: underline;
+    }
+
+    .sub-nav {
+        display: flex;
+        padding-bottom: 1em;
+    }
+
+    .sub-nav li {
+        padding: 0 .5em;
+    }
+
     table {
         border: 1px solid #fff;
         border-collapse: collapse;
+        width: 100%;
     }
 
     thead {
-        background-color: aquamarine;
+        background-color: #04AA6D;
         font-weight: bold;
+        color: #fff;
     }
 
     tbody tr:nth-child(2n) {
-        background-color: #e0e0e0;
+        background-color: #E7E9EB;
     }
 
     thead td {
@@ -231,7 +247,7 @@
     td {
         padding: 1em;
         text-align: center;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #ddd;
     }
 
     .pagination {
@@ -246,20 +262,7 @@
 
     .active {
         color: white;
-        background-color: cadetblue;
-    }
-
-    .a-btn {
-        text-decoration: underline;
-    }
-    
-    .place-section {
-        display: flex;
-        padding-bottom: 1em;
-    }
-
-    .place-section li {
-        padding: 0 .5em;
+        background-color: #04AA6D;
     }
 </style>
 </html>
