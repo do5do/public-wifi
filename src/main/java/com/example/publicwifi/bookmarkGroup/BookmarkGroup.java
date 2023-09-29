@@ -3,10 +3,7 @@ package com.example.publicwifi.bookmarkGroup;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 
 @Getter
 public class BookmarkGroup {

@@ -1,6 +1,5 @@
 package com.example.publicwifi.wifi.servlet;
 
-import com.example.publicwifi.util.Page;
 import com.example.publicwifi.wifi.Wifi;
 import com.example.publicwifi.wifi.WifiService;
 import jakarta.servlet.RequestDispatcher;

@@ -1,6 +1,5 @@
 package com.example.publicwifi.bookmarkGroup.servlet;
 
-import com.example.publicwifi.bookmarkGroup.BookmarkGroup;
 import com.example.publicwifi.bookmarkGroup.BookmarkGroupService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
