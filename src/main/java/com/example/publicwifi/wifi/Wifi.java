@@ -1,14 +1,17 @@
 package com.example.publicwifi.wifi;
 
 import com.example.publicwifi.wifi.dto.WifiResponseDto;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Wifi implements Comparable<Wifi> {
     private Long wno;
     private Double distance;
@@ -28,8 +31,6 @@ public class Wifi implements Comparable<Wifi> {
     private double x; // lnt
     private double y; // lat
     private String workDate; // 작업일자
-
-    public Wifi() {}
 
     @Builder
     public Wifi(Long wno, String mgmtNum, String borough, String wifiName, String address, String addrDetail, String installLoc, String installType, String installAgency, String serviceType, String netType, String installYear, String inoutDoor, String wifiConnEnv, double x, double y, String workDate) {

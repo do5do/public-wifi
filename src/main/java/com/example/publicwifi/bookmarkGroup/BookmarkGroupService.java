@@ -1,12 +1,13 @@
 package com.example.publicwifi.bookmarkGroup;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookmarkGroupService {
-    public BookmarkGroupService() {}
-
     @Getter
     private static final BookmarkGroupService instance = new BookmarkGroupService();
 

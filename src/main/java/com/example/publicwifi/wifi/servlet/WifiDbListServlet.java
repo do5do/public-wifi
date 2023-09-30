@@ -34,6 +34,7 @@ public class WifiDbListServlet extends HttpServlet {
             request.setAttribute("wifiList", nearbyWifi);
         }
 
+        request.setAttribute("type", "db");
         RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/wifi/wifiList.jsp");
         dispatcher.forward(request, response);
     }

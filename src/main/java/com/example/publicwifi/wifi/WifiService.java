@@ -11,7 +11,9 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriBuilder;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,9 +22,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WifiService {
-    private WifiService() {}
-
     @Getter
     private static final WifiService instance = new WifiService();
 
@@ -34,9 +35,13 @@ public class WifiService {
 
     public List<Wifi> getNearbyWifi(double lnt, double lat) { // 근처 와이파이 정보 20개 가져오기
         AddressDto address = getAddress(lnt, lat);
-        return wifiDao.findByBorough(address.region(), address.roadName())
+        List<Wifi> wifiList = wifiDao.findAllByBorough(address.region(), address.roadName())
                 .stream().map(o -> o.setDistance(lnt, lat))
-                .sorted().toList().subList(0, 20);
+                .sorted().toList();
+        if (wifiList.size() > 20) {
+            wifiList = wifiList.subList(0, 20);
+        }
+        return wifiList;
     }
 
     public Page<Wifi> getWifiListWithLoc(int currentPage, double lnt, double lat) { // 위치 기반 와이파이 api 조회 페이징
@@ -52,10 +57,13 @@ public class WifiService {
     public AddressDto getAddress(double lnt, double lat) {
         KakaoResponseDto kakaoResponseDto = searchAddress(lnt, lat);
 
-        String region = kakaoResponseDto.documents().get(0).address().region_2depth_name();
+        String region = "";
         String roadName = "";
-        if (kakaoResponseDto.documents().get(0).roadAddress() != null) {
-            roadName = kakaoResponseDto.documents().get(0).roadAddress().road_name();
+        if (!kakaoResponseDto.documents().isEmpty()) {
+            region = kakaoResponseDto.documents().get(0).address().region_2depth_name();
+            if (kakaoResponseDto.documents().get(0).roadAddress() != null) {
+                roadName = kakaoResponseDto.documents().get(0).roadAddress().road_name();
+            }
         }
 
         return new AddressDto(region, roadName);
@@ -68,7 +76,6 @@ public class WifiService {
                 .queryParam("y", lat)
                 .build();
         StringBuilder sb = httpConnection(uri, true);
-        System.out.println(uri);
 
         try {
             return objectMapper.readValue(sb.toString(), new TypeReference<>() {});
@@ -87,7 +94,6 @@ public class WifiService {
                 .path(roadName)
                 .build();
         StringBuilder sb = httpConnection(uri, false);
-        System.out.println(uri);
 
         try {
             return objectMapper.readValue(sb.toString(), new TypeReference<>() {});
@@ -144,6 +150,10 @@ public class WifiService {
             wifiDao.saveAll(Wifi.of(wifiResponseDto));
         }
         return totalCount;
+    }
+
+    public Wifi findMgmtNum(String mgmtNum) {
+        return wifiDao.findByMgmtNum(mgmtNum);
     }
 
     public Wifi findById(Long id) {

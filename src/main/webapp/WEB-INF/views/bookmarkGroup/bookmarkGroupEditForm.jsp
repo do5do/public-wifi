@@ -15,11 +15,11 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/wifi/v2" class="a-btn">홈</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">위치 히스토리 목록</a></li>
+            <li><a href="${pageContext.request.contextPath}/locHistory" class="a-btn">위치 히스토리 목록</a></li>
             <li>|</li>
             <li><a href="${pageContext.request.contextPath}/wifi/load" class="a-btn">Open API 와이파이 정보 가져오기</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">북마크 보기</a></li>
+            <li><a href="${pageContext.request.contextPath}/bookmark" class="a-btn">북마크 보기</a></li>
             <li>|</li>
             <li><a href="${pageContext.request.contextPath}/bookmarkGroup" class="a-btn">북마크 그룹 관리</a></li>
         </ul>

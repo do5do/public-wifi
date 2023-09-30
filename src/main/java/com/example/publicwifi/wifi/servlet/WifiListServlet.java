@@ -39,6 +39,7 @@ public class WifiListServlet extends HttpServlet {
             request.setAttribute("wifiList", wifiPage.getContents());
         }
 
+        request.setAttribute("type", "open");
         RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/wifi/wifiList.jsp");
         dispatcher.forward(request, response);
     }

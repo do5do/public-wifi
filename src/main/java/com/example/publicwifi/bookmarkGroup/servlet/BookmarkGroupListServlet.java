@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/bookmarkGroup")
-public class BookmarkGroupServlet extends HttpServlet {
+public class BookmarkGroupListServlet extends HttpServlet {
     private BookmarkGroupService bookmarkGroupService;
 
     @Override
@@ -26,7 +26,7 @@ public class BookmarkGroupServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<BookmarkGroup> bookmarkGroups = bookmarkGroupService.findAll();
         request.setAttribute("bookmarkGroups", bookmarkGroups);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/bookmarkGroup/bookmarkGroup.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/bookmarkGroup/bookmarkGroupList.jsp");
         dispatcher.forward(request, response);
     }
 }

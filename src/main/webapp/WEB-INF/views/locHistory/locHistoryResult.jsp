@@ -4,8 +4,8 @@
     <title>Title</title>
 </head>
 <script>
-    alert("북마크 그룹 정보를 ${msg}하였습니다.")
-    location.href = "${pageContext.request.contextPath}/bookmarkGroup";
+    alert("위치 히스토리 정보를 삭제하였습니다.")
+    location.href = "${pageContext.request.contextPath}/locHistory";
 </script>
 <body>
 

@@ -28,8 +28,15 @@ public class WifiDetailServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String id = request.getParameter("id");
-        Wifi wifi = wifiService.findById(Long.parseLong(id));
+        String wno = request.getParameter("wno");
+        Wifi wifi;
+        if (wno != null) {
+            wifi = wifiService.findById(Long.parseLong(wno));
+        } else {
+            String mgmtNum = request.getParameter("mgmtNum");
+            wifi = wifiService.findMgmtNum(mgmtNum);
+        }
+
         List<BookmarkGroup> bookmarkGroups = bookmarkGroupService.findAll();
 
         request.setAttribute("wifi", wifi);

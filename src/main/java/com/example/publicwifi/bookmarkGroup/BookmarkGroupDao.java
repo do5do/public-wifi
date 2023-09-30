@@ -1,7 +1,9 @@
 package com.example.publicwifi.bookmarkGroup;
 
 import com.example.publicwifi.util.ConnectionManager;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,9 +12,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookmarkGroupDao {
-    public BookmarkGroupDao() {}
-
     @Getter
     private static final BookmarkGroupDao instance = new BookmarkGroupDao();
 
@@ -100,7 +101,8 @@ public class BookmarkGroupDao {
     }
 
     public void update(String name, Long seq, Long id) {
-        String sql = "update bookmarkGroup set name = ?, seq = ? where bgno = ?";
+        String sql = "update bookmarkGroup set name = ?, seq = ?, " +
+                "modifiedDate = datetime('now', 'localtime') where bgno = ?";
         PreparedStatement pstmt = null;
         Connection conn = null;
 

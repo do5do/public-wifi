@@ -14,11 +14,14 @@
             return;
         }
 
-        // api pagination
-        // const url = "wifi?page=1&lnt=" + lnt.value + "&lat=" + lat.value
-        const url = "${pageContext.request.contextPath}/wifi/v2?lnt=" + lnt.value + "&lat=" + lat.value
+        // top 20 from db
+        let url = "${pageContext.request.contextPath}/wifi/v2?lnt=" + lnt.value + "&lat=" + lat.value;
+        if (${type.equals("open")}) {
+            // api pagination
+            url = "${pageContext.request.contextPath}/wifi?page=1&lnt=" + lnt.value + "&lat=" + lat.value;
+        }
 
-        await getResText(url)
+        await getWifiList(url)
             .then(text => {
                 let parser = new DOMParser();
                 let doc = parser.parseFromString(text, "text/html")
@@ -29,13 +32,12 @@
             })
     }
 
-    function getResText(url) {
-        return new Promise((resolve, reject) => {
+    function getWifiList(url) {
+        return new Promise(resolve => {
             fetch(url)
                 .then((response) => {
                     let text = response.text()
                     resolve(text)
-                    reject("해당 위치의 데이터가 없습니다.") // 처리 안됨
                 })
         })
     }
@@ -51,12 +53,17 @@
             maximumAge : 0
         };
 
-        function success(position) {
+        async function success(position) {
             let x = position.coords.longitude;
             let y = position.coords.latitude;
             lnt.value = x;
             lat.value = y;
             status.textContent = "";
+
+            // 위치 정보 저장
+            const url = "${pageContext.request.contextPath}/locHistory/save?lnt=" + x + "&lat=" + y;
+            await fetch(url)
+                .catch(err => console.log(err));
         }
 
         function error() {
@@ -78,11 +85,11 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/wifi/v2" class="a-btn">홈</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">위치 히스토리 목록</a></li>
+            <li><a href="${pageContext.request.contextPath}/locHistory" class="a-btn">위치 히스토리 목록</a></li>
             <li>|</li>
             <li><a href="${pageContext.request.contextPath}/wifi/load" class="a-btn">Open API 와이파이 정보 가져오기</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">북마크 보기</a></li>
+            <li><a href="${pageContext.request.contextPath}/bookmark" class="a-btn">북마크 보기</a></li>
             <li>|</li>
             <li><a href="${pageContext.request.contextPath}/bookmarkGroup" class="a-btn">북마크 그룹 관리</a></li>
         </ul>
@@ -91,8 +98,7 @@
         <li>
             <label for="lnt">LNT : </label>
             <c:if test="${lnt == null}">
-<%--                <input type="number" id="lnt" value="0.0">--%>
-                <input type="number" id="lnt" value="127.062453121811">
+                <input type="number" id="lnt" value="0.0">
             </c:if>
             <c:if test="${lnt != null}">
                 <input type="number" id="lnt" value="${lnt}">
@@ -101,8 +107,7 @@
         <li>
             <label for="lat">LAT : </label>
             <c:if test="${lat == null}">
-<%--                <input type="number" id="lat" value="0.0">--%>
-                <input type="number" id="lat" value="37.4826884445598">
+                <input type="number" id="lat" value="0.0">
             </c:if>
             <c:if test="${lat != null}">
                 <input type="number" id="lat" value="${lat}">
@@ -139,54 +144,59 @@
             </tr>
         </thead>
         <tbody>
-            <c:if test="${wifiList == null}">
+        <c:if test="${wifiList == null}">
+            <tr>
+                <td colspan="17">위치 정보를 입력한 후에 조회해 주세요.</td>
+            </tr>
+        </c:if>
+        <c:if test="${wifiList != null}">
+            <c:if test="${wifiList.isEmpty()}">
                 <tr>
-                    <td colspan="17">위치 정보를 입력한 후에 조회해 주세요.</td>
+                    <td colspan="17">해당 위치에 대한 데이터가 없습니다.</td>
                 </tr>
             </c:if>
-            <c:if test="${wifiList != null}">
-                <c:forEach var="item" items="${wifiList}">
-                    <tr>
-                        <td>${item.distance}</td>
-                        <td>${item.mgmtNum}</td>
-                        <td>${item.borough}</td>
-                        <td><a href="${pageContext.request.contextPath}/wifi/detail?id=${item.wno}">${item.wifiName}</a></td>
-                        <td>${item.address}</td>
-                        <td>${item.addrDetail}</td>
-                        <td>${item.installLoc}</td>
-                        <td>${item.installType}</td>
-                        <td>${item.installAgency}</td>
-                        <td>${item.serviceType}</td>
-                        <td>${item.netType}</td>
-                        <td>${item.installYear}</td>
-                        <td>${item.inoutDoor}</td>
-                        <td>${item.wifiConnEnv}</td>
-                        <td>${item.x}</td>
-                        <td>${item.y}</td>
-                        <td>${item.workDate}</td>
-                    </tr>
-                </c:forEach>
-            </c:if>
+            <c:forEach var="item" items="${wifiList}">
+                <tr>
+                    <td>${item.distance}</td>
+                    <td>${item.mgmtNum}</td>
+                    <td>${item.borough}</td>
+                    <td><a href="${pageContext.request.contextPath}/wifi/detail?mgmtNum=${item.mgmtNum}">${item.wifiName}</a></td>
+                    <td>${item.address}</td>
+                    <td>${item.addrDetail}</td>
+                    <td>${item.installLoc}</td>
+                    <td>${item.installType}</td>
+                    <td>${item.installAgency}</td>
+                    <td>${item.serviceType}</td>
+                    <td>${item.netType}</td>
+                    <td>${item.installYear}</td>
+                    <td>${item.inoutDoor}</td>
+                    <td>${item.wifiConnEnv}</td>
+                    <td>${item.x}</td>
+                    <td>${item.y}</td>
+                    <td>${item.workDate}</td>
+                </tr>
+            </c:forEach>
+        </c:if>
         </tbody>
     </table>
 
     <c:if test="${pageable != null}">
         <ul class="pagination">
             <c:if test="${pageable.startPage > pageable.pagePerBlock}">
-                <li><a href="wifi?page=1&lat=${lat}&lnt=${lnt}" class="a-btn">처음</a></li>
-                <li><a href="wifi?page=${pageable.startPage - 1}&lat=${lat}&lnt=${lnt}" class="a-btn">이전</a></li>
+                <li><a href="wifi?page=1&lnt=${lnt}&lat=${lat}" class="a-btn">처음</a></li>
+                <li><a href="wifi?page=${pageable.startPage - 1}&lnt=${lnt}&lat=${lat}" class="a-btn">이전</a></li>
             </c:if>
             <c:forEach var="i" begin="${pageable.startPage}" end="${pageable.endPage}">
                 <c:if test="${pageable.currentPage == i}">
-                    <li><a href="wifi?page=${i}&lat=${lat}&lnt=${lnt}" class="active">${i}</a></li>
+                    <li><a href="wifi?page=${i}&lnt=${lnt}&lat=${lat}" class="active">${i}</a></li>
                 </c:if>
                 <c:if test="${pageable.currentPage != i}">
-                    <li><a href="wifi?page=${i}&lat=${lat}&lnt=${lnt}">${i}</a></li>
+                    <li><a href="wifi?page=${i}&lnt=${lnt}&lat=${lat}">${i}</a></li>
                 </c:if>
             </c:forEach>
             <c:if test="${pageable.endPage < pageable.totalPages}">
-                <li><a href="wifi?page=${pageable.endPage + 1}&lat=${lat}&lnt=${lnt}" class="a-btn">다음</a></li>
-                <li><a href="wifi?page=${pageable.totalPages}&lat=${lat}&lnt=${lnt}" class="a-btn">마지막</a></li>
+                <li><a href="wifi?page=${pageable.endPage + 1}&lnt=${lnt}&lat=${lat}" class="a-btn">다음</a></li>
+                <li><a href="wifi?page=${pageable.totalPages}&lnt=${lnt}&lat=${lat}" class="a-btn">마지막</a></li>
             </c:if>
         </ul>
     </c:if>

@@ -1,11 +1,14 @@
 package com.example.publicwifi.bookmarkGroup;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookmarkGroup {
     private Long bgno;
     private String name;

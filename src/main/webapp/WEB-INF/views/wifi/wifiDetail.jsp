@@ -4,17 +4,28 @@
 <head>
     <title>Title</title>
 </head>
+<script>
+    function addBookmark() {
+        let bgno = document.querySelector('select[name="bookmarkGroup"] > option:checked').value;
+
+        if (bgno === 'none') {
+            alert("북마크 그룹을 선택해주세요.")
+        } else {
+            document.location.href='${pageContext.request.contextPath}/bookmark/save?bgno=' + bgno + "&wno=" + ${wifi.wno};
+        }
+    }
+</script>
 <body>
     <h1>와이파이 정보</h1>
     <nav>
         <ul>
             <li><a href="${pageContext.request.contextPath}/wifi/v2" class="a-btn">홈</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">위치 히스토리 목록</a></li>
+            <li><a href="${pageContext.request.contextPath}/locHistory" class="a-btn">위치 히스토리 목록</a></li>
             <li>|</li>
             <li><a href="${pageContext.request.contextPath}/wifi/load" class="a-btn">Open API 와이파이 정보 가져오기</a></li>
             <li>|</li>
-            <li><a href="#" class="a-btn">북마크 보기</a></li>
+            <li><a href="${pageContext.request.contextPath}/bookmark" class="a-btn">북마크 보기</a></li>
             <li>|</li>
             <li><a href="${pageContext.request.contextPath}/bookmarkGroup" class="a-btn">북마크 그룹 관리</a></li>
         </ul>
@@ -22,16 +33,16 @@
     <ul class="sub-nav">
         <li>
             <select name="bookmarkGroup">
-                <option>북마크 그룹 선택</option>
+                <option value="none">북마크 그룹 선택</option>
                 <c:if test="${!bookmarkGroups.isEmpty()}">
                     <c:forEach var="item" items="${bookmarkGroups}">
-                        <option value="${item.name}">${item.name}</option>
+                        <option value="${item.bgno}">${item.name}</option>
                     </c:forEach>
                 </c:if>
             </select>
         </li>
         <li>
-            <button>북마크 추가하기</button>
+            <button onclick="addBookmark()">북마크 추가하기</button>
         </li>
     </ul>
     <table>
@@ -39,7 +50,7 @@
             <c:if test="${wifi != null}">
                 <tr>
                     <td>거리(Km)</td>
-                    <td>0.000</td>
+                    <td>0.0000</td>
                 </tr>
                 <tr>
                     <td>관리 번호</td>

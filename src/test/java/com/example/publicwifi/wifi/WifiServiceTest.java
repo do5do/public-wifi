@@ -18,8 +18,7 @@ class WifiServiceTest {
         // given
         int startRow = 1;
         int endRow = 5;
-        String region = "";
-//        String region = "부산진구";
+        String region = "강남구";
         String roadName = "";
 
         // when
@@ -27,6 +26,7 @@ class WifiServiceTest {
 
         // then
         assertEquals(responseDto.wifiInfo().row().size(), 5);
+        assertEquals(responseDto.wifiInfo().row().get(0).X_SWIFI_WRDOFC(), region);
     }
 
     @Test
@@ -79,7 +79,10 @@ class WifiServiceTest {
         double lnt = 126.901955141101;
         double lat = 37.5662141900954;
 
-        List<Wifi> wifi = wifiService.getNearbyWifi(lnt, lat);
-        System.out.println(wifi);
+        // when
+        List<Wifi> wifis = wifiService.getNearbyWifi(lnt, lat);
+
+        // then
+        assertEquals(wifis.get(0).getBorough(), "마포구");
     }
 }
