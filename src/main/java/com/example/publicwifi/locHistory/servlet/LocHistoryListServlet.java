@@ -1,6 +1,5 @@
 package com.example.publicwifi.locHistory.servlet;
 
-import com.example.publicwifi.bookmark.Bookmark;
 import com.example.publicwifi.locHistory.LocHistory;
 import com.example.publicwifi.locHistory.LocHistoryService;
 import jakarta.servlet.RequestDispatcher;

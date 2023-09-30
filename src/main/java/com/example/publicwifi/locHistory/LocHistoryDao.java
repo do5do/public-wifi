@@ -1,6 +1,5 @@
 package com.example.publicwifi.locHistory;
 
-import com.example.publicwifi.bookmark.Bookmark;
 import com.example.publicwifi.util.ConnectionManager;
 import lombok.AccessLevel;
 import lombok.Getter;

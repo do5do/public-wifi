@@ -1,6 +1,5 @@
 package com.example.publicwifi.bookmark.servlet;
 
-import com.example.publicwifi.bookmark.Bookmark;
 import com.example.publicwifi.bookmark.BookmarkService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
@@ -11,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/bookmark/save")
 public class BookmarkSaveServlet extends HttpServlet {
