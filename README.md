@@ -22,7 +22,6 @@ src
 │   │   └── com
 │   │       └── example
 │   │           └── publicwifi
-│   │               ├── HelloServlet.java
 │   │               ├── bookmark
 │   │               │   ├── Bookmark.java
 │   │               │   ├── BookmarkDao.java
