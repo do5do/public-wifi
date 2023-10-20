@@ -21,12 +21,12 @@ public class ConnectionManager {
                 pstmt.close();
             }
 
-            if (conn != null) {
-                conn.close();
-            }
-
             if (rs != null) {
                 rs.close();
+            }
+
+            if (conn != null) {
+                conn.close();
             }
         } catch (SQLException e) {
             throw new IllegalStateException(e.getMessage());
