@@ -115,6 +115,7 @@ src
        - https://www.erdcloud.com/d/JWeDx6Qeke8hnFZdy
      - SQL 파일 (publicWifi.sql)
      - 캡쳐 이미지 (ERD_image.PNG)
+     - <img width="890" alt="ERD_image" src="https://github.com/do5do/public-wifi/assets/56918540/9f1883ab-02a7-4dba-83d5-f387608ff3d3">
 2. 데모 영상 (공공와이파이_데모영상)
    - 참고) 현재 지역이 서울이 아니라서 특정 좌표 정보를 미리 넣어두고 실행하였습니다.
 3. README.md
